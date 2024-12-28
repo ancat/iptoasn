@@ -1,4 +1,4 @@
-require_relative 'main.rb'
+require 'iptoasn'
 
 finder = IpToAsn.new
 ip_address = ARGV[0]
