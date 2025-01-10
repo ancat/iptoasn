@@ -1,0 +1,16 @@
+PATH
+  remote: .
+  specs:
+    iptoasn (0.5.0)
+
+GEM
+  specs:
+
+PLATFORMS
+  arm64-darwin-23
+
+DEPENDENCIES
+  iptoasn!
+
+BUNDLED WITH
+   2.2.3
