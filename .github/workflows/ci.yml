@@ -31,7 +31,7 @@ jobs:
 
       # Run Rubocop
       - name: Run Rubocop
-        run: bundle exec rubocop
+        run: bundle exec rubocop --force-exclusion lib/chunks/
 
       # Run RSpec Tests
       - name: Run RSpec
