@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests and Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Set up Ruby environment
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1 # Update to your Ruby version
+          bundler-cache: true # Caches installed gems
+
+      # Install dependencies
+      - name: Install Gems
+        run: bundle install --jobs 4 --retry 3
+
+      # Run Rubocop
+      - name: Run Rubocop
+        run: bundle exec rubocop
+
+      # Run RSpec Tests
+      - name: Run RSpec
+        run: bundle exec rspec
