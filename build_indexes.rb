@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'ipaddr'
 
 def ip_to_int(ip)
@@ -6,7 +8,7 @@ end
 
 def parse_tsv_file(file_name)
   result = []
-  File.foreach(file_name).with_index do |line, index|
+  File.foreach(file_name).with_index do |line, _index|
     fields = line.strip.split("\t")
     range_start = ip_to_int(fields[0])
     range_end = ip_to_int(fields[1])
@@ -21,7 +23,7 @@ def parse_tsv_file(file_name)
 end
 
 index = []
-Dir.glob(File.join("tmp/", "chunk_*")) do |file|
+Dir.glob(File.join('tmp/', 'chunk_*')) do |file|
   puts "Processing file: #{file}"
   tsv_file = parse_tsv_file(file)
   filename = File.basename(file)
@@ -32,8 +34,8 @@ Dir.glob(File.join("tmp/", "chunk_*")) do |file|
   chunk_source = "def chunk_#{filename}()\n\t#{tsv_file.inspect}\nend\n"
   File.write("chunks/#{filename}.rb", chunk_source)
 
-  index << [ip_address_min, ip_address_max, "#{filename}"]
+  index << [ip_address_min, ip_address_max, filename.to_s]
 end
 
 index_source = "def chunk_index()\n\t#{index.inspect}\nend\n"
-File.write("index.rb", index_source)
+File.write('index.rb', index_source)
