@@ -1,62 +1,49 @@
 # frozen_string_literal: true
 
-require 'ipaddr'
+require_relative 'lib/iptoasn'
+require 'fileutils'
 
-def ip_to_int(ip)
-  IPAddr.new(ip).to_i
-end
+input_file = ARGV[0]
+out_dir = ARGV[1] || 'data'
 
-def parse_tsv_file(file_name)
-  result = []
-  File.foreach(file_name).with_index do |line, _index|
-    fields = line.strip.split("\t")
-    range_start = ip_to_int(fields[0])
-    range_end = ip_to_int(fields[1])
-    asn = fields[2].to_i
-    country_code = fields[3].to_sym
-    name = fields[4]
+FileUtils.mkdir_p(out_dir)
 
-    result << [range_start, range_end, asn, country_code, name]
+output_index = File.open(File.join(out_dir, IpToAsn::DB_MAIN), 'w')
+country_index = File.open(File.join(out_dir, IpToAsn::DB_COUNTRIES), 'w')
+asn_index = File.open(File.join(out_dir, IpToAsn::DB_ASNAMES), 'w')
+
+countries = {}
+asnames = []
+seen_asnames = {}
+asname_offset = 0
+
+File.foreach(input_file) do |line|
+  range_start, range_end, asnumber, country, asname = *line.strip.split("\t")
+
+  country = 'XX' if country.length != 2
+  unless seen_asnames.include? asnumber
+    seen_asnames[asnumber] = asname_offset
+    asname_offset += asname.length
+    asnames << asname
   end
 
-  result
+  countries[country] = true
+
+  as = IpToAsn::AsEntry.new(
+    range_start,
+    range_end,
+    asnumber.to_i,
+    countries.keys.index(country),
+    seen_asnames[asnumber],
+    asname.length
+  )
+  output_index.write(as.serialize)
 end
 
-def build_as_index(parsed_contents)
-  as_index = {}
-  parsed_contents.each do |line|
-    _, _, as_number, _, as_name = *line
-    as_index[as_number] = as_name
-  end
+output_index.close
 
-  as_index
-end
+country_index.write(countries.keys.join(''))
+country_index.close
 
-index = []
-Dir.glob(File.join('tmp/', 'chunk_*')) do |file|
-  puts "Processing file: #{file}"
-  tsv_file = parse_tsv_file(file)
-  filename = File.basename(file)
-
-  ip_address_min = tsv_file[0][0]
-  ip_address_max = tsv_file[-1][1]
-
-  handle = File.open("lib/chunks/#{filename}.rb", 'w')
-  chunk_as_index = build_as_index(tsv_file)
-  handle.write("def chunk_#{filename}()\n")
-  handle.write("  c = #{chunk_as_index.inspect}\n")
-  handle.write("  m = #{ip_address_min}\n")
-  handle.write("  [\n")
-  tsv_file.each do |line|
-    handle.write("[m+#{line[0] - ip_address_min},m+#{line[1] - ip_address_min},#{line[2]},#{line[3].inspect},c[#{line[2]}]],")
-  end
-
-  handle.write("  ]\n")
-  handle.write('end')
-  handle.close
-
-  index << [ip_address_min, ip_address_max, filename.to_s]
-end
-
-index_source = "def chunk_index()\n\t#{index.inspect}\nend\n"
-File.write('lib/index.rb', index_source)
+asn_index.write(asnames.join(''))
+asn_index.close

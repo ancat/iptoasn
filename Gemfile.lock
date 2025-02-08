@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    iptoasn (1.0.0)
+    iptoasn (1.1.0)
 
 GEM
   remote: https://rubygems.org/

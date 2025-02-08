@@ -2,7 +2,8 @@
 
 require 'iptoasn'
 
-finder = IpToAsn.new
+finder = IpToAsn::Lookup.new
+
 ip_address = ARGV[0]
 
 response = finder.lookup(ip_address)
