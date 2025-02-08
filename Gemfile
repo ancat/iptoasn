@@ -2,8 +2,11 @@
 
 source 'https://rubygems.org'
 
-gem 'iptoasn', path: '.'
+gemspec
 
-gem 'rubocop', '~> 1.69'
+gem 'iptoasn-data', '~> 1'
 
-gem 'rspec', '~> 3.13'
+group :development do
+  gem 'rspec', '~> 3.13'
+  gem 'rubocop', '~> 1.69'
+end

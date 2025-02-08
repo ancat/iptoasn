@@ -3,9 +3,12 @@
 module IpToAsn
   class Lookup
     def initialize(db_ip2asn: nil, db_country: nil, db_names: nil) # rubocop:disable Metrics/AbcSize
-      db_ip2asn ||= File.expand_path('../../data/ip2asn.dat', __dir__)
-      db_country ||= File.expand_path('../../data/countries.dat', __dir__)
-      db_names ||= File.expand_path('../../data/asnames.dat', __dir__)
+      if db_ip2asn.nil? || db_country.nil? || db_names.nil?
+        require 'iptoasn/data'
+        db_ip2asn = IpToAsn::Data.ip2asn
+        db_country = IpToAsn::Data.countries
+        db_names = IpToAsn::Data.asnames
+      end
 
       @db_ip2asn = File.open(db_ip2asn, 'r')
       @db_country = File.read(db_country)
