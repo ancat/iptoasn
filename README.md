@@ -1,6 +1,6 @@
 # iptoasn
 
-`iptoasn` is a Ruby gem that provides a simple way to query Autonomous System (AS) information for a given IP address using the [iptoasn.com](https://iptoasn.com) dataset. This gem directly contains the iptoasn dataset broken up into chunks; at build time an index is created so individual chunks can be lazy loaded.
+`iptoasn` is a Ruby gem that provides a simple way to query Autonomous System (AS) information for a given IP address using the [iptoasn.com](https://iptoasn.com) dataset. This repo only contains the `iptoasn` gem which is responsible for loading, parsing, and searching through the ip2asn dataset. The data itself is in the [iptoasn-data](https://github.com/ancat/iptoasn-data) repository. This makes managing updates to the code vs the data a bit simpler.
 
 ## Features
 
@@ -8,12 +8,13 @@
 - Efficient lazy loading to minimize memory usage.
 - Compatible with IPv4 addresses.
 
-## Installation
+## Installation and Updates
 
 Add this line to your application's Gemfile:
 
 ```ruby
 gem 'iptoasn'
+gem 'iptoasn-data'
 ```
 
 And then execute:
@@ -22,11 +23,7 @@ And then execute:
 bundle install
 ```
 
-Or install it yourself as:
-
-```bash
-gem install iptoasn
-```
+The dataset can be updated periodically by running `bundle update iptoasn-data`.
 
 ## Usage
 
@@ -35,7 +32,7 @@ Here is a basic example of how to use the `iptoasn` gem:
 ```ruby
 require 'iptoasn'
 
-finder = IpToAsn.new
+finder = IpToAsn::Lookup.new
 ip_address = ARGV[0]
 
 response = finder.lookup(ip_address)
@@ -46,23 +43,6 @@ end
 
 puts "#{ip_address} is in #{response[:country_code]} and belongs to #{response[:as_name]}"
 ```
-
-## Building
-
-```shell
-$ make fetch   # grab the latest copy of the dataset
-$ make process # break it up into chunks
-$ make index   # build indexes
-$ make clean   # clean up
-```
-
-## Dataset
-
-The gem wraps the [iptoasn.com](https://iptoasn.com) dataset, which contains information about:
-- IP address ranges (start and end IPs)
-- Autonomous System Numbers (ASNs)
-- Country codes
-- Autonomous System names
 
 ## License
 
