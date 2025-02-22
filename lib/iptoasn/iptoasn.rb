@@ -27,6 +27,7 @@ module IpToAsn
       @db_ip2asn.seek(0, IO::SEEK_END)
       @db_total_entries = @db_ip2asn.size / @entry_size
       @db_ip2asn.seek(0)
+      @mutex = Mutex.new
     end
 
     def ip_to_int(ip)
@@ -50,7 +51,9 @@ module IpToAsn
 
       return { as_number: 0, country_code: 'XX', as_name: reserved_range_name } unless reserved_range_name.nil?
 
-      search_db(ip)
+      @mutex.synchronize do
+        search_db(ip)
+      end
     end
 
     def search_db(ip) # rubocop:disable Metrics/AbcSize
